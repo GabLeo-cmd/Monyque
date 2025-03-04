@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para Monyque</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #ffe6f2 0%, #ffc0cb 100%);
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .animated-text {
+            font-size: 4rem;
+            color: #ff1493;
+            opacity: 0;
+            animation: fadeIn 3s ease-in-out forwards, pulse 2s infinite 3s;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2);
+            margin-bottom: 10px;
+        }
+        
+        .secondary-text {
+            font-size: 1.5rem;
+            color: #ff1493;
+            opacity: 0;
+            animation: fadeIn 3s ease-in-out 1s forwards;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.15);
+            margin-bottom: 30px;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Botão para tocar música */
+        .play-button {
+            margin-top: 30px;
+            padding: 12px 24px;
+            background: linear-gradient(to bottom, #ff69b4, #ff1493);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: bold;
+        }
+
+        .play-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .play-button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .play-button.paused {
+            background: linear-gradient(to bottom, #ff9cc9, #ff69b4);
+        }
+        
+        /* Flores animadas */
+        .flower {
+            position: absolute;
+            z-index: 1;
+            pointer-events: none;
+            transition: all 0.5s ease;
+            opacity: 0;
+            animation: flowerAppear 8s ease-in-out forwards;
+        }
+        
+        @keyframes flowerAppear {
+            0% { opacity: 0; transform: scale(0); }
+            20% { opacity: 1; transform: scale(1); }
+            80% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0); }
+        }
+        
+        .flower-center {
+            width: 20px;
+            height: 20px;
+            background-color: #FFEB3B;
+            border-radius: 50%;
+            position: relative;
+        }
+        
+        .petal {
+            position: absolute;
+            width: 30px;
+            height: 40px;
+            background-color: #FF69B4;
+            border-radius: 50%;
+            transform-origin: bottom center;
+            animation: openClose 8s ease-in-out infinite;
+        }
+        
+        .petal:nth-child(1) { transform: rotate(0deg) translateY(-15px); animation-delay: 0s; }
+        .petal:nth-child(2) { transform: rotate(72deg) translateY(-15px); animation-delay: 0.5s; }
+        .petal:nth-child(3) { transform: rotate(144deg) translateY(-15px); animation-delay: 1s; }
+        .petal:nth-child(4) { transform: rotate(216deg) translateY(-15px); animation-delay: 1.5s; }
+        .petal:nth-child(5) { transform: rotate(288deg) translateY(-15px); animation-delay: 2s; }
+        
+        @keyframes openClose {
+            0%, 100% { transform: rotate(var(--rotation)) translateY(-15px) scale(0.7); }
+            50% { transform: rotate(var(--rotation)) translateY(-25px) scale(1); }
+        }
+
+        /* Escondendo o áudio visualmente */
+        .audio-control {
+            position: absolute;
+            opacity: 0;
+            height: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="animated-text">Monyque, eu te amo</h1>
+        <p class="secondary-text">Apenas para lembrar um pouco o que sinto por você</p>
+        <button class="play-button" onclick="toggleAudio()">
+            ♫ Tocar Música ♫
+        </button>
+    </div>
+    
+    <!-- Usando o arquivo local m4a -->
+    <audio id="bgMusic" class="audio-control">
+        <source src="videoplayback.m4a" type="audio/mp4">
+        Seu navegador não suporta reprodução de áudio.
+    </audio>
+    
+    <script>
+        // Flag para controlar se a música foi iniciada pelo menos uma vez
+        let musicStarted = false;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            startFlowerAnimation();
+        });
+
+        function toggleAudio() {
+            const audio = document.getElementById('bgMusic');
+            const button = document.querySelector('.play-button');
+            
+            // Se a música ainda não foi iniciada, comece do segundo 9
+            if (!musicStarted) {
+                audio.currentTime = 9;
+                
+                audio.play()
+                .then(() => {
+                    button.innerHTML = '♫ Música Tocando ♫';
+                    button.classList.remove('paused');
+                    musicStarted = true;
+                })
+                .catch(err => {
+                    console.error("Erro ao reproduzir: ", err);
+                    button.innerHTML = 'Clique novamente para tocar';
+                    
+                    // Tentar novamente quando o usuário clicar
+                    button.onclick = function() {
+                        audio.currentTime = 9; // Garantir que ainda comece no segundo 9
+                        audio.play().catch(e => {
+                            alert("Seu navegador não permite reprodução automática de áudio. Por favor, clique no botão direito e selecione 'permitir reprodução automática'.");
+                        });
+                        // Restaurar o handler original após a primeira reprodução
+                        setTimeout(() => {
+                            button.onclick = toggleAudio;
+                        }, 500);
+                    };
+                });
+            } 
+            // Se a música já foi iniciada, alternar entre pausar e retomar
+            else {
+                if (audio.paused) {
+                    // Retomar a reprodução
+                    audio.play();
+                    button.innerHTML = '♫ Música Tocando ♫';
+                    button.classList.remove('paused');
+                } else {
+                    // Pausar a reprodução
+                    audio.pause();
+                    button.innerHTML = '▶ Continuar Música';
+                    button.classList.add('paused');
+                }
+            }
+        }
+        
+        function startFlowerAnimation() {
+            // Criar novas flores periodicamente
+            setInterval(createRandomFlower, 1000);
+        }
+        
+        function createRandomFlower() {
+            const flower = document.createElement('div');
+            flower.className = 'flower';
+            
+            // Posicionar aleatoriamente
+            flower.style.left = Math.random() * 100 + 'vw';
+            flower.style.top = Math.random() * 100 + 'vh';
+            
+            // Tamanho aleatório
+            const size = Math.random() * 0.7 + 0.5; // escala entre 0.5 e 1.2
+            flower.style.transform = `scale(${size})`;
+            
+            // Atrasar o tempo de aparecimento para cada flor
+            flower.style.animationDelay = (Math.random() * 2) + 's';
+            
+            // Criar centro da flor
+            const center = document.createElement('div');
+            center.className = 'flower-center';
+            flower.appendChild(center);
+            
+            // Criar pétalas
+            for (let i = 0; i < 5; i++) {
+                const petal = document.createElement('div');
+                petal.className = 'petal';
+                petal.style.setProperty('--rotation', (i * 72) + 'deg');
+                
+                // Cores variadas de pétalas
+                const colors = ['#FF69B4', '#FF1493', '#FFB6C1', '#FFC0CB', '#DB7093'];
+                petal.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                // Atraso de animação aleatório
+                petal.style.animationDelay = (Math.random() * 2) + 's';
+                
+                flower.appendChild(petal);
+            }
+            
+            document.body.appendChild(flower);
+            
+            // Remover a flor após a animação terminar
+            setTimeout(() => {
+                if (document.body.contains(flower)) {
+                    document.body.removeChild(flower);
+                }
+            }, 8000);
+        }
+    </script>
+</body>
+</html>
